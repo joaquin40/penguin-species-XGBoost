@@ -3,6 +3,10 @@ title: "xgboost"
 output: html_notebook
 ---
 
+```{r}
+knitr::purl("xgboost.Rmd")
+```
+
 
 ```{r}
 pacman::p_load(tidyverse, xgboost, palmerpenguins, DataExplorer, caret, groupdata2)
@@ -11,6 +15,12 @@ pacman::p_load(tidyverse, xgboost, palmerpenguins, DataExplorer, caret, groupdat
 ```{r}
 data("penguins")
 ```
+
+Descriptions of data
+```{r}
+skimr::skim(penguins)
+```
+
 
 Check for missing NA
 ```{r}
@@ -30,7 +40,7 @@ df |> plot_missing()
 
 Count of Species
 ```{r}
-penguins |> 
+freq_species <-  penguins |> 
   ggplot(aes(species, fill = species)) +
   geom_bar() + 
    geom_text(
@@ -40,7 +50,12 @@ penguins |>
     color = "black",
     size = 3
   ) + 
+  labs(title = "Frequency of Species") + 
   theme(legend.position = "none")
+
+ggsave("./images/freq_species.png", freq_species)
+
+
 ```
 
 
@@ -50,15 +65,19 @@ df2 <- groupdata2::downsample(df, cat_col = "species")
 ```
 
 ```{r}
-df2 |> 
+bal_species <- df2 |> 
   ggplot(aes(species, fill = species)) +
   geom_bar() + 
   geom_text(aes(label = ..count..),
            stat = "count",
            vjust = -0.5,
            color = "black",
-           size = 3)+
+           size = 3) + 
+  labs(title = "Balance Frequency of Species") + 
   theme(legend.position = "none")
+
+ggsave("./images/bal_species.png", bal_species)
+
 ```
 
 
@@ -117,7 +136,7 @@ fit_xgboost <- xgb.cv(
   params = params,
   data = as.matrix(train[, -1]),  # convert data to matrix format
   label = train[,1],              # target variable
-  nfold = 10,
+  nfold = 5,
   nrounds = 100,        
   verbose = 0,          # disable verbose output
   early_stopping_rounds = 10
@@ -162,7 +181,7 @@ test_fct <- factor(test$species, labels = levels(df2$species))
 
 Confusion matrix
 ```{r}
-cm <- table(pred = pred_fct, actual = test_fct)
+cm <- table(prediction = pred_fct, actual = test_fct)
 confusionMatrix(cm)
 ```
 
