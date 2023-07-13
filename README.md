@@ -9,7 +9,7 @@ The distribution of frequency `Species` is shown below. Down sampling was perfor
 
 Balance data of `Species`
 
-![](./images/bal_species.png)
+![](./images/bal_species.png) 
 
 
 
